@@ -1,8 +1,10 @@
-%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
+%bcond_without python3
+
+%global pkgname oath
 
 Summary:          Python implementation of HOTP, TOTP and OCRA
-Name:             python-oath
-Version:          1.4.1
+Name:             python-%{pkgname}
+Version:          1.4.3
 Release:          CROC1%{?dist}
 License:          BSD 3-clause
 Group:            Development/Libraries
@@ -14,12 +16,24 @@ URL:              https://github.com/bdauvergne/python-oath
 BuildArch:        noarch
 
 Vendor:           Benjamin Dauvergne <bdauvergne@entrouvert.com>
-Packager:         Vadim Radovel <vadim@radovel.ru>
 
 Source0:          %name-%version.tar.gz
 
-%description
+%global _description\
 Python implementation of the three main OATH specifications: HOTP, TOTP and OCRA
+
+%description %_description
+
+
+%if %{with python3}
+%package -n python%{python3_pkgversion}-%{pkgname}
+Summary:        %summary
+
+BuildRequires:  python%{python3_pkgversion}
+BuildRequires:  python%{python3_pkgversion}-setuptools
+
+%description -n python%{python3_pkgversion}-%{pkgname} %_description
+%endif
 
 
 %prep
@@ -27,20 +41,47 @@ Python implementation of the three main OATH specifications: HOTP, TOTP and OCRA
 
 
 %build
-%{__python} setup.py build
+%py2_build
+
+%if %{with python3}
+%py3_build
+%endif
 
 
 %install
-%{__python} setup.py install -O1 --skip-build --root $RPM_BUILD_ROOT
+[ %buildroot = "/" ] || rm -rf %buildroot
 
-find $RPM_BUILD_ROOT/ -name '*.egg-info' -exec rm -rf -- '{}' '+'
+%py2_install
+
+%if %{with python3}
+%py3_install
+%endif
+
+
+%check
+%{__python2} setup.py test
+
+%if %{with python3}
+%{__python3} setup.py test
+%endif
 
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 
 %files
 %defattr(-,root,root,-)
 %doc README.rst
 %{python_sitelib}/*
+
+%if %{with python3}
+%files -n python%{python3_pkgversion}-%{pkgname}
+%doc README.rst
+%{python3_sitelib}/*
+%endif
+
+
+%changelog
+* Mon Apr 13 2020 Croc Cloud Engineering - 1.4.3-CROC1
+- Build for py2/py3 for Croc cloud
