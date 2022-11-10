@@ -5,12 +5,12 @@
 Summary:          Python implementation of HOTP, TOTP and OCRA
 Name:             python-%{pkgname}
 Version:          1.4.3
-Release:          CROC1%{?dist}
+Release:          CROC2%{?dist}
 License:          BSD 3-clause
 Group:            Development/Libraries
 
 Provides:         %name = %version-%release
-BuildRequires:    make, python, python-setuptools, python-devel
+BuildRequires:    make
 
 URL:              https://github.com/bdauvergne/python-oath
 BuildArch:        noarch
@@ -41,45 +41,28 @@ BuildRequires:  python%{python3_pkgversion}-setuptools
 
 
 %build
-%py2_build
-
-%if %{with python3}
 %py3_build
-%endif
+
 
 
 %install
 [ %buildroot = "/" ] || rm -rf %buildroot
-
-%py2_install
-
-%if %{with python3}
 %py3_install
-%endif
+
 
 
 %check
-%{__python2} setup.py test
-
-%if %{with python3}
 %{__python3} setup.py test
-%endif
 
 
 %clean
 rm -rf %{buildroot}
 
 
-%files
-%defattr(-,root,root,-)
-%doc README.rst
-%{python_sitelib}/*
 
-%if %{with python3}
 %files -n python%{python3_pkgversion}-%{pkgname}
 %doc README.rst
 %{python3_sitelib}/*
-%endif
 
 
 %changelog
